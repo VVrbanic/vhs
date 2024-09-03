@@ -4,16 +4,16 @@ import com.example.VHS.controller.RentalController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RentalException extends RuntimeException {
-    private static final Logger logger = LoggerFactory.getLogger(RentalController.class);
+public class PriceForTomorrowAdded extends RuntimeException {
+    private static final Logger logger = LoggerFactory.getLogger(PriceForTomorrowAdded.class);
 
-    public RentalException(String message) {
+    public PriceForTomorrowAdded(String message) {
         super(message);
         logger.warn(message);
 
     }
 
-    public RentalException(String message, Throwable cause) {
+    public PriceForTomorrowAdded(String message, Throwable cause) {
         super(message, cause);
         logger.warn(message);
 

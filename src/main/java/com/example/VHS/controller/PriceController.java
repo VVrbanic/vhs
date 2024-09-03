@@ -1,6 +1,8 @@
 package com.example.VHS.controller;
 
 import com.example.VHS.entity.Price;
+import com.example.VHS.entity.PriceValidation;
+import com.example.VHS.exception.PriceException;
 import com.example.VHS.service.PriceService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,13 +26,13 @@ public class PriceController {
         this.priceService = priceService;
     }
 
+    @GetMapping
+    public List<Price> getAllPrices(){
+        return priceService.getAllPrices();
+    }
     @PostMapping("/add")
-    public ResponseEntity<Price> addNewPrice(@Valid @RequestBody Price price){
-        //add new price
-        LocalDateTime time = LocalDateTime.now();
-        price.setActive(Boolean.TRUE);
-        price.setDateFrom(time);
-        Price newPrice = priceService.save(price, time);
+    public ResponseEntity<Price> addNewPrice(@Valid @RequestBody PriceValidation price){
+        Price newPrice = priceService.save(price);
         return new ResponseEntity<>(newPrice, HttpStatus.CREATED);
     }
 
@@ -44,6 +47,14 @@ public class PriceController {
             errors.put(fieldName, errorMessage);
         });
 
+        return errors;
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(PriceException.class)
+    public Map<String, String> handleValidationException(PriceException ex){
+        Map<String, String> errors = new HashMap<>();
+        errors.put("conflict", ex.getMessage());
         return errors;
     }
 
