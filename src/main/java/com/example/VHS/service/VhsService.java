@@ -53,19 +53,21 @@ public class VhsService {
     }
 
     public void checkIfVhsIsValid(VhsValidation vhsValidation){
-        List<Vhs> vhsList = this.getAllVhs();
-        Predicate<Vhs> nameConflict = checkName -> checkName.getName().equalsIgnoreCase(vhsValidation.getName());
-        Predicate<Vhs> totalNumberConflict = checkNum -> vhsValidation.getTotalNumber() <= 0;
+        List<Vhs> vhsList = vhsRepository.findAll();
+        if(!vhsList.isEmpty()){
+            Predicate<Vhs> nameConflict = checkName -> checkName.getName().equalsIgnoreCase(vhsValidation.getName());
+            Predicate<Vhs> totalNumberConflict = checkNum -> vhsValidation.getTotalNumber() <= 0;
 
-        Map<Predicate<Vhs>, String> conditions = Map.of(nameConflict.and(totalNumberConflict), "A VHS with this name already exists and the total number had to be bigger than 0!",
-                nameConflict, "A VHS with this name already exists!!",
-                totalNumberConflict, " The total number has to be bigger than 0!!");
+            Map<Predicate<Vhs>, String> conditions = Map.of(nameConflict.and(totalNumberConflict), "A VHS with this name already exists and the total number had to be bigger than 0!",
+                    nameConflict, "A VHS with this name already exists!!",
+                    totalNumberConflict, " The total number has to be bigger than 0!!");
 
-        conditions.entrySet().stream()
-                .filter(entry -> vhsList.stream().anyMatch(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .ifPresent(message -> {throw new VhsException(message); });
+            conditions.entrySet().stream()
+                    .filter(entry -> vhsList.stream().anyMatch(entry.getKey()))
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .ifPresent(message -> {throw new VhsException(message); });
+        }
+
     }
-
 }

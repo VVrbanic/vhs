@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @Service
@@ -116,20 +117,23 @@ public class UserService {
         }
     }
 
-    public void checkIfUserExists(User user){
-        List<User> userList = this.getAllUsers();
-        Predicate<User> emailConflict = userCheck -> user.getEmail().equals(userCheck.getEmail());
-        Predicate<User> userNameConflict = userCheck -> user.getUserName().equals(userCheck.getUserName());
+    public void checkIfUserExists(User user) {
+        List<User> userList = userRepository.findAll();
+        if (!userList.isEmpty()) {
+            Predicate<User> emailConflict = userCheck -> user.getEmail().equals(userCheck.getEmail());
+            Predicate<User> userNameConflict = userCheck -> user.getUserName().equals(userCheck.getUserName());
 
-        Map<Predicate<User>, String> conditions = Map.of(emailConflict.and(userNameConflict), "A user with this email and user name exist!",
-                emailConflict, "A user with this email exists",
-                userNameConflict, "A user with this name exists!");
+            Map<Predicate<User>, String> conditions = Map.of(emailConflict.and(userNameConflict), "A user with this email and user name exist!",
+                    emailConflict, "A user with this email exists",
+                    userNameConflict, "A user with this name exists!");
 
-        conditions.entrySet().stream()
-                .filter(entry -> userList.stream().anyMatch(entry.getKey()))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .ifPresent(message -> { throw new UserExistsException(message); });
-
+            conditions.entrySet().stream()
+                    .filter(entry -> userList.stream().anyMatch(entry.getKey()))
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .ifPresent(message -> {
+                        throw new UserExistsException(message);
+                    });
+        }
     }
 }
